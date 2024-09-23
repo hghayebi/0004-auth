@@ -1,7 +1,7 @@
 "use client";
 
 import { RegisterSchema } from "@/schemas";
-import React, { useState } from "react";
+import React, { useState, useTransition } from "react";
 import { z } from "zod";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,10 +15,18 @@ import {
   KeyIcon,
   UserIcon,
 } from "@heroicons/react/16/solid";
+import FormError from "../common/form-error";
+import FormSuccess from "../common/form-success";
+import actions from "@/actions";
 
 type RegisterFormValues = z.infer<typeof RegisterSchema>;
 
 export default function RegisterForm() {
+  const [isPending, startTransition] = useTransition();
+
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
   const [isVisible, setIsVisible] = useState(false);
   const toggleVisibility = () => setIsVisible((prev) => !prev);
 
@@ -39,7 +47,23 @@ export default function RegisterForm() {
   });
 
   const onSubmit: SubmitHandler<RegisterFormValues> = (data) => {
-    console.log(data);
+    setError("");
+    setSuccess("");
+
+    startTransition(async () => {
+      const result = await actions.register(data);
+
+      if (result?.error) {
+        setError(result.error);
+      } else if (result?.success) {
+        setSuccess(result.success);
+
+        setValue("name", "");
+        setValue("email", "");
+        setValue("password", "");
+        setValue("confirmPassword", "");
+      }
+    });
   };
 
   return (
@@ -56,6 +80,7 @@ export default function RegisterForm() {
           render={({ field }) => (
             <Input
               {...field}
+              isDisabled={isPending}
               variant="bordered"
               label="Name"
               placeholder="John Doe"
@@ -71,6 +96,7 @@ export default function RegisterForm() {
           render={({ field }) => (
             <Input
               {...field}
+              isDisabled={isPending}
               variant="bordered"
               label="Email"
               placeholder="johndoe@example.com"
@@ -86,6 +112,7 @@ export default function RegisterForm() {
           render={({ field }) => (
             <Input
               {...field}
+              isDisabled={isPending}
               variant="bordered"
               label="Password"
               placeholder="*****"
@@ -115,6 +142,7 @@ export default function RegisterForm() {
           render={({ field }) => (
             <Input
               {...field}
+              isDisabled={isPending}
               variant="bordered"
               label="Confirm Password"
               placeholder="*****"
@@ -126,8 +154,12 @@ export default function RegisterForm() {
           )}
         />
 
+        <FormError message={error} />
+        <FormSuccess message={success} />
+
         <Button
           type="submit"
+          isLoading={isPending}
           fullWidth
           size="lg"
           className="bg-foreground-800 text-white"
