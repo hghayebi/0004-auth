@@ -17,10 +17,18 @@ import {
 import FormError from "../common/form-error";
 import FormSuccess from "../common/form-success";
 import actions from "@/actions";
+import { useSearchParams } from "next/navigation";
 
 type LoginFormValues = z.infer<typeof LoginSchema>;
 
 export default function LoginForm() {
+  const searchParams = useSearchParams();
+
+  const urlError =
+    searchParams.get("error") === "OAuthAccountNotLinked"
+      ? "Email already in use with another provider!"
+      : searchParams.get("error");
+
   const [isPending, startTransition] = useTransition();
 
   const [error, setError] = useState("");
@@ -116,7 +124,7 @@ export default function LoginForm() {
           )}
         />
 
-        <FormError message={error} />
+        <FormError message={urlError || error} />
         <FormSuccess message={success} />
 
         <Button

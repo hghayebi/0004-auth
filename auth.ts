@@ -8,6 +8,7 @@ import { LoginSchema } from "./schemas";
 import { getUserByEmail } from "./data/user";
 import { User } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import paths from "./paths";
 
 export type UserExtended = Omit<User, "password"> & DefaultSession["user"];
 
@@ -26,6 +27,9 @@ export const {
   session: { strategy: "jwt" },
   adapter: PrismaAdapter(db),
 
+  pages: {
+    signIn: paths.login(),
+  },
   callbacks: {
     async jwt({ token, user }) {
       if (token && user) {
