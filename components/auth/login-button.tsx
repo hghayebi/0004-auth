@@ -1,7 +1,9 @@
+"use client";
+
 import paths from "@/paths";
 import { Button, ButtonProps } from "@nextui-org/react";
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
 
 interface LoginButtonProps extends ButtonProps {
   children: React.ReactNode;
@@ -13,9 +15,17 @@ export default function LoginButton({
   mode = "redirect",
   ...rest
 }: LoginButtonProps) {
+  const [isClicked, setIsClicked] = useState(false);
+
   if (mode === "modal") return <span>TODO: Implement modal</span>;
   return (
-    <Button as={Link} href={paths.login()} {...rest}>
+    <Button
+      isLoading={isClicked}
+      as={Link}
+      href={paths.login()}
+      onClick={() => setIsClicked(true)}
+      {...rest}
+    >
       {children}
     </Button>
   );
