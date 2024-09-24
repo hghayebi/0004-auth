@@ -9,6 +9,9 @@ const paths = {
   register() {
     return "/auth/register";
   },
+  defaultLoginRedirect() {
+    return "/settings";
+  },
 };
 
 export default paths;
