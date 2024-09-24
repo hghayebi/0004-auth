@@ -5,6 +5,7 @@ import paths from "./paths";
 
 export default auth((req) => {
   const isLoggedIn: boolean = !!req.auth;
+  console.log({ isLoggedIn });
 
   const isPublicRoute: boolean = publicRoutes.includes(req.nextUrl.pathname);
   const isAuthRoute: boolean = authRoutes.includes(req.nextUrl.pathname);

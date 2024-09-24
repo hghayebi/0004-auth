@@ -5,6 +5,9 @@ import { LoginSchema } from "@/schemas";
 import { User } from "@prisma/client";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
+import { signIn } from "@/auth";
+import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
+import { AuthError } from "next-auth";
 
 type LoginResponse =
   | { error: string; success?: undefined }
@@ -41,7 +44,19 @@ export const login = async (
 
   // TODO: Check if email not verified Send verification email
 
-  // TODO: Sign in here
+  //  Sign in here
+  try {
+    await signIn("credentials", {
+      email,
+      password,
+      redirectTo: DEFAULT_LOGIN_REDIRECT,
+    });
+  } catch (err) {
+    if (err instanceof AuthError) {
+      return { error: err.message };
+    }
+    throw err;
+  }
 
   return { success: "Successful login!" };
 };
