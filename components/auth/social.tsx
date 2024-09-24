@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@nextui-org/react";
+import { signIn } from "next-auth/react";
 // import { signIn } from "next-auth/react";
 import React, { useState } from "react";
 import { FaGithub } from "react-icons/fa";
@@ -11,7 +12,7 @@ export default function Social() {
   const [githubClicked, setGithubClicked] = useState(false);
 
   const onClick = async (provider: "google" | "github") => {
-    // await signIn(provider);
+    await signIn(provider);
 
     if (provider === "google") {
       setGoogleClicked(true);
