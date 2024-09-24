@@ -5,7 +5,7 @@ import Google from "next-auth/providers/google";
 import Github from "next-auth/providers/github";
 import db from "./db";
 import { LoginSchema } from "./schemas";
-import { getUserByEmail } from "./data/user";
+import { getUserByEmail, getUserById } from "./data/user";
 import { User } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import paths from "./paths";
@@ -27,10 +27,39 @@ export const {
   session: { strategy: "jwt" },
   adapter: PrismaAdapter(db),
 
+  events: {
+    async linkAccount({ user }) {
+      try {
+        await db.user.update({
+          where: { id: user.id },
+          data: { emailVerified: new Date() },
+        });
+      } catch (err) {
+        throw err;
+      }
+    },
+  },
+
   pages: {
     signIn: paths.login(),
   },
   callbacks: {
+    async signIn({ user, account }) {
+      if (account?.provider !== "credentials") return true;
+
+      let existingUser: User | null = null;
+      try {
+        existingUser = await getUserById(user.id || "");
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (err) {
+        return false;
+      }
+
+      if (!existingUser || !existingUser.emailVerified) return false;
+
+      return true;
+    },
+
     async jwt({ token, user }) {
       if (token && user) {
         token.user = user;
